@@ -94,11 +94,11 @@ export function highlightLines(src: string, lang: Lang): Token[][] {
 export const langOf = (path: string): Lang => (path.endsWith(".rs") ? "rust" : "solidity");
 
 export const TOKEN_CLASS: Record<TokenKind, string> = {
-  kw: "text-violet-300",
-  type: "text-sky-300",
-  str: "text-emerald-300",
+  kw: "text-lavender-300",
+  type: "text-sky-200",
+  str: "text-[#d9b99b]",
   num: "text-orange-300",
-  com: "text-zinc-500 italic",
-  fn: "text-amber-200",
-  plain: "text-zinc-200",
+  com: "text-mocha-500 italic",
+  fn: "text-mocha-50",
+  plain: "text-mocha-200",
 };

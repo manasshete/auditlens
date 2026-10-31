@@ -6,6 +6,7 @@ import type { Chain, Finding } from "@/lib/types";
 import { SEVERITY_ORDER } from "@/lib/types";
 import { CodeBlock, useCodeViewer } from "./CodeViewer";
 import { SeverityBadge } from "./SeverityBadge";
+import { SEVERITY_HEX } from "./SummaryBar";
 
 type Filter = "all" | "tool" | "ai" | "false_positive";
 
@@ -47,53 +48,60 @@ export function FindingList({ findings, actions }: { findings: Finding[]; action
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="glass flex flex-wrap items-center gap-2 rounded-2xl px-3 py-2.5">
         {filters.map(([id, label]) => (
           <button
             key={id}
             onClick={() => setFilter(id)}
-            className={`rounded-full px-3 py-1 text-sm ring-1 transition ${
-              filter === id ? "bg-zinc-100 text-zinc-900 ring-zinc-100" : "text-zinc-400 ring-zinc-700 hover:text-zinc-200"
+            className={`rounded-full px-3 py-1 text-sm transition ${
+              filter === id
+                ? "bg-mocha-100 font-medium text-mocha-950"
+                : "text-mocha-300 ring-1 ring-mocha-700 hover:text-mocha-50 hover:ring-mocha-500"
             }`}
           >
             {label}
           </button>
         ))}
-        <label className="ml-2 flex cursor-pointer items-center gap-2 text-sm text-zinc-300">
+        <label className="ml-1 flex cursor-pointer items-center gap-2 rounded-full px-2 py-1 text-sm text-mocha-200 transition hover:bg-mocha-800/60">
           <span
             role="switch"
             aria-checked={eli5}
             tabIndex={0}
             onClick={() => setEli5(!eli5)}
             onKeyDown={(e) => (e.key === " " || e.key === "Enter") && (e.preventDefault(), setEli5(!eli5))}
-            className={`relative h-5 w-9 rounded-full transition ${eli5 ? "bg-amber-400" : "bg-zinc-700"}`}
+            className={`relative h-5 w-9 rounded-full transition ${eli5 ? "bg-lavender-400" : "bg-mocha-700"}`}
           >
             <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${eli5 ? "left-[18px]" : "left-0.5"}`} />
           </span>
           Explain like I&apos;m new
         </label>
-        <span className="ml-auto flex gap-3 text-xs text-zinc-500">
-          <button onClick={() => setOpen(new Set(shown.map((f) => f.id)))} className="hover:text-zinc-300">
+        <span className="ml-auto flex gap-3 text-xs text-mocha-500">
+          <button onClick={() => setOpen(new Set(shown.map((f) => f.id)))} className="hover:text-mocha-300">
             Expand all
           </button>
-          <button onClick={() => setOpen(new Set())} className="hover:text-zinc-300">
+          <button onClick={() => setOpen(new Set())} className="hover:text-mocha-300">
             Collapse all
           </button>
         </span>
       </div>
 
-      {shown.length === 0 && <p className="rounded-xl border border-zinc-800 p-6 text-sm text-zinc-500">No findings in this view.</p>}
+      {shown.length === 0 && <p className="glass rounded-2xl p-8 text-center text-sm text-mocha-400">No findings in this view.</p>}
 
       {SEVERITY_ORDER.map((sev) => {
         const group = shown.filter((f) => f.severity === sev);
         if (!group.length) return null;
         return (
-          <section key={sev} className="space-y-2">
-            <h3 className="text-xs font-medium uppercase tracking-widest text-zinc-500">
-              {sev} · {group.length}
+          <section key={sev} className="space-y-3">
+            <h3 className="flex items-center gap-3 pt-2 text-xs font-medium uppercase tracking-[0.2em] text-mocha-400">
+              <span className="h-2 w-2 rounded-full" style={{ background: SEVERITY_HEX[sev], boxShadow: `0 0 10px ${SEVERITY_HEX[sev]}` }} />
+              {sev}
+              <span className="rounded-full bg-mocha-800 px-2 py-0.5 text-[10px] tracking-normal text-mocha-200">{group.length}</span>
+              <span className="h-px flex-1 bg-gradient-to-r from-mocha-700 to-transparent" />
             </h3>
-            {group.map((f) => (
-              <FindingCard key={f.id} f={f} eli5={eli5} open={open.has(f.id)} onToggle={() => toggle(f.id)} actions={actions} />
+            {group.map((f, i) => (
+              <div key={f.id} className="animate-fade-up" style={{ animationDelay: `${Math.min(i, 6) * 60}ms` }}>
+                <FindingCard f={f} eli5={eli5} open={open.has(f.id)} onToggle={() => toggle(f.id)} actions={actions} />
+              </div>
             ))}
           </section>
         );
@@ -144,26 +152,40 @@ function FindingCard({
   const openCode = () => view({ path: f.file_name, line: f.line, title: f.title });
 
   return (
-    <article className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/40">
-      <button onClick={onToggle} className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-zinc-900">
+    <article
+      className={`relative overflow-hidden rounded-2xl border bg-mocha-900/55 backdrop-blur transition duration-300 ${
+        open
+          ? "border-mocha-600/80 shadow-[0_24px_60px_-30px_rgba(196,181,236,0.45)]"
+          : "border-mocha-700/60 hover:-translate-y-0.5 hover:border-mocha-500/70 hover:shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)]"
+      }`}
+    >
+      {/* Severity edge */}
+      <span aria-hidden className="absolute inset-y-0 left-0 w-1" style={{ background: SEVERITY_HEX[f.severity] }} />
+      <button onClick={onToggle} aria-expanded={open} className="flex w-full items-center gap-3 py-4 pl-6 pr-5 text-left">
         <SeverityBadge severity={f.severity} />
-        <span className="flex-1 font-medium text-zinc-100">{f.title}</span>
+        <span className="flex-1 text-[15px] font-medium text-mocha-50">{f.title}</span>
         {f.exploit?.status === "confirmed" && (
           <span className="rounded bg-red-500/15 px-2 py-0.5 text-xs text-red-300 ring-1 ring-red-500/40">Exploit confirmed</span>
         )}
         {f.fix?.applied && <span className="rounded bg-sky-500/10 px-2 py-0.5 text-xs text-sky-300 ring-1 ring-sky-500/30">Fix applied</span>}
         <SourceBadge f={f} />
-        <span className="hidden font-mono text-xs text-zinc-500 sm:inline">
+        <span className="hidden rounded-md bg-mocha-950/60 px-2 py-0.5 font-mono text-xs text-mocha-400 md:inline">
           {f.file_name}:{f.line}
         </span>
-        <span className={`text-zinc-500 transition ${open ? "rotate-90" : ""}`}>›</span>
+        <span
+          className={`grid h-6 w-6 place-items-center rounded-full transition duration-300 ${
+            open ? "rotate-90 bg-lavender-300/20 text-lavender-200" : "bg-mocha-800/80 text-mocha-300"
+          }`}
+        >
+          ›
+        </span>
       </button>
 
       {open && (
-        <div className="space-y-4 border-t border-zinc-800 px-4 py-4 text-sm">
-          <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-zinc-500">
-            <span>{f.id}</span>
-            <button onClick={openCode} className="font-mono text-amber-300/90 underline decoration-dotted underline-offset-2 hover:text-amber-200">
+        <div className="space-y-5 border-t border-mocha-700/60 py-5 pl-6 pr-5 text-sm">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-mocha-400 [&>*]:rounded-md [&>*]:bg-mocha-950/50 [&>*]:px-2 [&>*]:py-1">
+            <span className="font-mono">{f.id}</span>
+            <button onClick={openCode} className="font-mono text-lavender-300/90 underline decoration-dotted underline-offset-2 hover:text-lavender-200">
               {f.file_name}:{f.line}
             </button>
             <span>Type: {f.vulnerability_type}</span>
@@ -180,20 +202,20 @@ function FindingCard({
             <button
               onClick={openCode}
               title="Open the whole file"
-              className="group block w-full overflow-x-auto rounded-lg bg-zinc-950 p-3 text-left font-mono text-xs text-amber-100 ring-1 ring-zinc-800 hover:ring-amber-400/50"
+              className="group block w-full overflow-x-auto rounded-xl bg-mocha-950/80 px-4 py-3 text-left font-mono text-xs text-lavender-100 ring-1 ring-mocha-700/70 transition hover:ring-lavender-400/60"
             >
-              <span className="select-none text-zinc-600">{String(f.line).padStart(4)} │ </span>
+              <span className="select-none text-mocha-600">{String(f.line).padStart(4)} │ </span>
               {f.code_quote}
-              <span className="float-right select-none pl-4 font-sans text-zinc-600 group-hover:text-amber-300">View in file →</span>
+              <span className="float-right select-none pl-4 font-sans text-mocha-600 group-hover:text-lavender-300">View in file →</span>
             </button>
           )}
 
           <div>
-            <h4 className="mb-1 text-xs font-medium uppercase tracking-wide text-zinc-500">{eli5 ? "In plain words" : "Explanation"}</h4>
+            <h4 className="mb-1 text-xs font-medium uppercase tracking-wide text-mocha-500">{eli5 ? "In plain words" : "Explanation"}</h4>
             {eli5 ? (
-              <div className="rounded-lg border border-amber-400/20 bg-amber-400/5 p-3 leading-relaxed text-zinc-200">
+              <div className="rounded-xl border border-lavender-400/25 bg-lavender-400/[0.07] p-4 leading-relaxed text-mocha-100">
                 <p>{simple ?? "No beginner explanation is available for this finding yet. The technical explanation is below."}</p>
-                {!simple && <p className="mt-2 text-zinc-400">{f.explanation}</p>}
+                {!simple && <p className="mt-2 text-mocha-400">{f.explanation}</p>}
                 {swc && (
                   <a href={swcUrl(f.swc_id!)} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs text-sky-400 hover:text-sky-300">
                     Learn more: {f.swc_id} {swc.title} ↗
@@ -201,18 +223,21 @@ function FindingCard({
                 )}
               </div>
             ) : (
-              <p className="leading-relaxed text-zinc-300">{f.explanation}</p>
+              <p className="leading-relaxed text-mocha-300">{f.explanation}</p>
             )}
           </div>
 
           {f.attack_scenario?.length ? (
             <div>
-              <h4 className="mb-1 text-xs font-medium uppercase tracking-wide text-zinc-500">Attack scenario</h4>
-              <ol className="space-y-1.5 border-l-2 border-red-500/40 pl-4">
+              <h4 className="mb-1 text-xs font-medium uppercase tracking-wide text-mocha-500">Attack scenario</h4>
+              <ol className="relative space-y-2.5 pl-1">
+                <span aria-hidden className="absolute bottom-2 left-[15px] top-2 w-px bg-gradient-to-b from-red-400/60 to-red-400/0" />
                 {f.attack_scenario.map((s, i) => (
-                  <li key={i} className="flex gap-2 text-zinc-300">
-                    <span className="font-mono text-xs leading-5 text-red-400">{i + 1}.</span>
-                    <span>{s}</span>
+                  <li key={i} className="relative flex gap-3 text-mocha-200">
+                    <span className="z-10 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-mocha-900 font-mono text-[11px] text-red-300 ring-1 ring-red-400/40">
+                      {i + 1}
+                    </span>
+                    <span className="pt-0.5">{s}</span>
                   </li>
                 ))}
               </ol>
@@ -221,14 +246,15 @@ function FindingCard({
 
           {f.suggested_fix.trim() && (
             <div>
-              <h4 className="mb-1 text-xs font-medium uppercase tracking-wide text-zinc-500">Suggested fix</h4>
-              <p className="whitespace-pre-wrap leading-relaxed text-zinc-300">{f.suggested_fix}</p>
+              <h4 className="mb-1 text-xs font-medium uppercase tracking-wide text-mocha-500">Suggested fix</h4>
+              <p className="whitespace-pre-wrap leading-relaxed text-mocha-300">{f.suggested_fix}</p>
             </div>
           )}
 
           {f.status !== "false_positive" && (
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 border-t border-mocha-700/40 pt-4">
               <ActionButton
+                variant="primary"
                 onClick={() => act("fix")}
                 busy={busy === "fix"}
                 disabled={!!busy || !actions.canGenerate}
@@ -244,7 +270,7 @@ function FindingCard({
                   busyLabel="Writing and running a Foundry test…"
                 />
               )}
-              {!actions.canGenerate && <span className="text-xs text-zinc-600">Needs an LLM and a report with stored source.</span>}
+              {!actions.canGenerate && <span className="text-xs text-mocha-600">Needs an LLM and a report with stored source.</span>}
             </div>
           )}
           {error && <p className="text-sm text-red-400">{error}</p>}
@@ -254,7 +280,7 @@ function FindingCard({
 
           <p className={`text-xs ${f.verified ? "text-emerald-400" : "text-amber-400"}`}>
             {f.verified ? "✓ Verified against source" : "⚠ Not verified"}
-            {f.verification_note && <span className="text-zinc-500"> · {f.verification_note}</span>}
+            {f.verification_note && <span className="text-mocha-500"> · {f.verification_note}</span>}
           </p>
         </div>
       )}
@@ -275,9 +301,9 @@ function FixPanel({
 }) {
   const fix = f.fix!;
   return (
-    <div className="space-y-2 rounded-lg border border-zinc-800 p-3">
+    <div className="space-y-3 rounded-2xl border border-mocha-700/60 bg-mocha-950/40 p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <h4 className="text-xs font-medium uppercase tracking-wide text-zinc-500">Generated patch</h4>
+        <h4 className="text-xs font-medium uppercase tracking-wide text-mocha-400">Generated patch</h4>
         {fix.compiles === true && (
           <span className="rounded bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-300 ring-1 ring-emerald-500/30">✓ compiles</span>
         )}
@@ -285,14 +311,15 @@ function FixPanel({
           <span className="rounded bg-red-500/10 px-2 py-0.5 text-xs text-red-300 ring-1 ring-red-500/30">✗ does not compile</span>
         )}
         {fix.compiles === null && (
-          <span className="rounded bg-zinc-500/10 px-2 py-0.5 text-xs text-zinc-400 ring-1 ring-zinc-600">compile check unavailable</span>
+          <span className="rounded bg-mocha-500/10 px-2 py-0.5 text-xs text-mocha-400 ring-1 ring-mocha-600">compile check unavailable</span>
         )}
-        <span className="text-xs text-zinc-600">{fix.compiler}</span>
+        <span className="text-xs text-mocha-600">{fix.compiler}</span>
         <span className="ml-auto">
           {fix.applied ? (
             <ActionButton onClick={() => onAct("unapply")} busy={busy === "unapply"} disabled={!!busy} label="Undo apply" busyLabel="…" subtle />
           ) : (
             <ActionButton
+              variant="primary"
               onClick={() => onAct("apply")}
               busy={busy === "apply"}
               disabled={!!busy || fix.compiles === false}
@@ -302,10 +329,10 @@ function FixPanel({
           )}
         </span>
       </div>
-      {fix.summary && <p className="text-zinc-300">{fix.summary}</p>}
+      {fix.summary && <p className="text-mocha-300">{fix.summary}</p>}
       <CodeBlock code={fix.diff.trim()} lang={lang} diff />
       {fix.compile_note && (
-        <details className="text-xs text-zinc-500">
+        <details className="text-xs text-mocha-500">
           <summary className="cursor-pointer">Compiler notes</summary>
           <pre className="mt-1 whitespace-pre-wrap">{fix.compile_note}</pre>
         </details>
@@ -316,8 +343,8 @@ function FixPanel({
 
 const EXPLOIT_STYLE: Record<string, [string, string]> = {
   confirmed: ["Exploit confirmed", "bg-red-500/15 text-red-300 ring-red-500/40"],
-  not_confirmed: ["Not confirmed", "bg-zinc-500/10 text-zinc-300 ring-zinc-600"],
-  not_run: ["Test written, not run", "bg-zinc-500/10 text-zinc-300 ring-zinc-600"],
+  not_confirmed: ["Not confirmed", "bg-mocha-500/10 text-mocha-300 ring-mocha-600"],
+  not_run: ["Test written, not run", "bg-mocha-500/10 text-mocha-300 ring-mocha-600"],
   error: ["Test did not compile", "bg-amber-400/10 text-amber-200 ring-amber-400/30"],
 };
 
@@ -325,9 +352,9 @@ function ExploitPanel({ f }: { f: Finding }) {
   const ex = f.exploit!;
   const [label, style] = EXPLOIT_STYLE[ex.status];
   return (
-    <div className="space-y-2 rounded-lg border border-zinc-800 p-3">
+    <div className="space-y-3 rounded-2xl border border-mocha-700/60 bg-mocha-950/40 p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <h4 className="text-xs font-medium uppercase tracking-wide text-zinc-500">Exploit test</h4>
+        <h4 className="text-xs font-medium uppercase tracking-wide text-mocha-400">Exploit test</h4>
         <span className={`rounded px-2 py-0.5 text-xs ring-1 ${style}`}>{label}</span>
         {ex.after_fix === "blocked" && (
           <span className="rounded bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-300 ring-1 ring-emerald-500/30">✓ applied fix blocks it</span>
@@ -336,17 +363,17 @@ function ExploitPanel({ f }: { f: Finding }) {
           <span className="rounded bg-red-500/10 px-2 py-0.5 text-xs text-red-300 ring-1 ring-red-500/30">✗ still exploitable after fix</span>
         )}
       </div>
-      {ex.note && <p className="text-zinc-400">{ex.note}</p>}
+      {ex.note && <p className="text-mocha-400">{ex.note}</p>}
       <details>
-        <summary className="cursor-pointer text-xs text-zinc-500">test/Exploit.t.sol</summary>
+        <summary className="cursor-pointer text-xs text-mocha-500">test/Exploit.t.sol</summary>
         <div className="mt-2">
           <CodeBlock code={ex.test} lang="solidity" />
         </div>
       </details>
       {ex.output && (
         <details>
-          <summary className="cursor-pointer text-xs text-zinc-500">forge output</summary>
-          <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded bg-zinc-950 p-2 text-xs text-zinc-400">{ex.output}</pre>
+          <summary className="cursor-pointer text-xs text-mocha-500">forge output</summary>
+          <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded bg-mocha-950 p-2 text-xs text-mocha-400">{ex.output}</pre>
         </details>
       )}
     </div>
@@ -360,6 +387,7 @@ function ActionButton({
   label,
   busyLabel,
   subtle,
+  variant,
 }: {
   onClick: () => void;
   busy: boolean;
@@ -367,13 +395,18 @@ function ActionButton({
   label: string;
   busyLabel: string;
   subtle?: boolean;
+  variant?: "primary";
 }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-md px-3 py-1.5 text-xs font-medium transition disabled:opacity-50 ${
-        subtle ? "text-zinc-300 ring-1 ring-zinc-700 hover:ring-zinc-500" : "bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
+      className={`rounded-xl px-4 py-2 text-xs font-semibold transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-50 ${
+        variant === "primary"
+          ? "bg-lavender-300 text-mocha-950 shadow-[0_8px_24px_-10px_rgba(196,181,236,0.9)] hover:bg-lavender-200"
+          : subtle
+            ? "text-mocha-300 ring-1 ring-mocha-700 hover:ring-mocha-500"
+            : "border border-mocha-600 bg-mocha-900/70 text-mocha-100 hover:border-lavender-400/60"
       }`}
     >
       {busy ? busyLabel : label}

@@ -27,7 +27,7 @@ const DOT: Record<Severity, string> = {
   high: "bg-orange-500",
   medium: "bg-amber-400",
   low: "bg-sky-500",
-  info: "bg-zinc-500",
+  info: "bg-mocha-500",
   optimization: "bg-emerald-500",
 };
 
@@ -123,36 +123,36 @@ function CodeModal({
       <div
         role="dialog"
         aria-label={`Source of ${target.path}`}
-        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 shadow-2xl"
+        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-mocha-700 bg-mocha-950 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center gap-3 border-b border-zinc-800 px-4 py-3">
-          <span className="font-mono text-sm text-zinc-200">
+        <div className="flex items-center gap-3 border-b border-mocha-800 px-4 py-3">
+          <span className="font-mono text-sm text-mocha-200">
             {target.path}
-            <span className="text-zinc-500">:{target.line}</span>
+            <span className="text-mocha-500">:{target.line}</span>
           </span>
-          {target.title && <span className="truncate text-sm text-zinc-500">· {target.title}</span>}
+          {target.title && <span className="truncate text-sm text-mocha-500">· {target.title}</span>}
           {data?.patched != null && (
-            <span className="ml-auto flex rounded-md bg-zinc-900 p-0.5 text-xs">
+            <span className="ml-auto flex rounded-md bg-mocha-900 p-0.5 text-xs">
               {(["Original", "With applied fix"] as const).map((label, i) => (
                 <button
                   key={label}
                   onClick={() => setShowPatched(i === 1)}
-                  className={`rounded px-2 py-1 ${showPatched === (i === 1) ? "bg-zinc-700 text-zinc-50" : "text-zinc-400"}`}
+                  className={`rounded px-2 py-1 ${showPatched === (i === 1) ? "bg-mocha-700 text-mocha-50" : "text-mocha-400"}`}
                 >
                   {label}
                 </button>
               ))}
             </span>
           )}
-          <button onClick={onClose} className={`${data?.patched != null ? "" : "ml-auto"} text-zinc-400 hover:text-zinc-100`} aria-label="Close">
+          <button onClick={onClose} className={`${data?.patched != null ? "" : "ml-auto"} text-mocha-400 hover:text-mocha-100`} aria-label="Close">
             ✕
           </button>
         </div>
 
         <div className="overflow-auto py-2 font-mono text-xs leading-5">
           {error && <p className="px-4 py-6 text-sm text-red-400">{error}</p>}
-          {!data && !error && <p className="px-4 py-6 text-sm text-zinc-500">Loading…</p>}
+          {!data && !error && <p className="px-4 py-6 text-sm text-mocha-500">Loading…</p>}
           {data &&
             lines.map((tokens, i) => {
               const n = i + 1;
@@ -165,14 +165,14 @@ function CodeModal({
                   key={n}
                   ref={n === scrollTo ? hit : undefined}
                   className={`flex whitespace-pre ${
-                    isHit ? "bg-amber-400/15 ring-1 ring-inset ring-amber-400/40" : isAdded ? "bg-emerald-500/10" : near ? "bg-zinc-900" : ""
+                    isHit ? "bg-lavender-400/15 ring-1 ring-inset ring-lavender-400/40" : isAdded ? "bg-emerald-500/10" : near ? "bg-mocha-900" : ""
                   }`}
                 >
                   <span className="w-4 shrink-0 select-none pl-1.5 pt-1.5">
                     {marks && <span title={marks.map((m) => `${m.id} ${m.title}`).join("\n")} className={`block h-2 w-2 rounded-full ${DOT[marks[0].severity]}`} />}
                     {isAdded && <span className="-mt-1.5 block text-emerald-400">+</span>}
                   </span>
-                  <span className={`w-12 shrink-0 select-none pr-3 text-right ${isHit ? "text-amber-300" : "text-zinc-600"}`}>{n}</span>
+                  <span className={`w-12 shrink-0 select-none pr-3 text-right ${isHit ? "text-lavender-300" : "text-mocha-600"}`}>{n}</span>
                   <span className="pr-4">
                     {tokens.map((t, k) => (
                       <span key={k} className={TOKEN_CLASS[t.kind]}>
@@ -197,7 +197,7 @@ export function CodeBlock({ code, lang, diff }: { code: string; lang: "solidity"
     [code, lang, diff],
   );
   return (
-    <pre className="max-h-96 overflow-auto rounded-lg bg-zinc-950 py-2 font-mono text-xs leading-5 ring-1 ring-zinc-800">
+    <pre className="max-h-96 overflow-auto rounded-lg bg-mocha-950 py-2 font-mono text-xs leading-5 ring-1 ring-mocha-800">
       {rows.map((r, i) => {
         const mark = diff ? r[0] : "";
         const hunk = diff && (r.startsWith("@@") || r.startsWith("---") || r.startsWith("+++"));
@@ -210,7 +210,7 @@ export function CodeBlock({ code, lang, diff }: { code: string; lang: "solidity"
               <span className="text-sky-400">{r}</span>
             ) : (
               <>
-                {diff && <span className={`select-none ${mark === "+" ? "text-emerald-400" : mark === "-" ? "text-red-400" : "text-zinc-600"}`}>{mark || " "} </span>}
+                {diff && <span className={`select-none ${mark === "+" ? "text-emerald-400" : mark === "-" ? "text-red-400" : "text-mocha-600"}`}>{mark || " "} </span>}
                 {tokens[i]?.map((t, k) => (
                   <span key={k} className={TOKEN_CLASS[t.kind]}>
                     {t.text}

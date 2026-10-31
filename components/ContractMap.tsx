@@ -8,7 +8,7 @@ const ACCESS: Record<CallableBy, [string, string, string]> = {
   anyone: ["anyone", "bg-amber-400/15 text-amber-200 ring-amber-400/40", "Callable by any address"],
   restricted: ["restricted", "bg-emerald-500/10 text-emerald-300 ring-emerald-500/30", "Caller is checked"],
   weak: ["tx.origin", "bg-red-500/15 text-red-300 ring-red-500/40", "Checked with tx.origin, which can be phished"],
-  internal: ["internal", "bg-zinc-500/10 text-zinc-400 ring-zinc-600", "Only callable from inside the contract"],
+  internal: ["internal", "bg-mocha-500/10 text-mocha-400 ring-mocha-600", "Only callable from inside the contract"],
 };
 
 interface Edge {
@@ -69,12 +69,12 @@ export function ContractMap({ contracts }: { contracts: MapContract[] }) {
   }, [contracts, onlyRisky]);
 
   if (!all.length) {
-    return <p className="rounded-xl border border-zinc-800 p-6 text-sm text-zinc-500">No contracts or functions could be parsed from the stored source.</p>;
+    return <p className="rounded-xl border border-mocha-800 p-6 text-sm text-mocha-500">No contracts or functions could be parsed from the stored source.</p>;
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-zinc-400">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-mocha-400">
         <span>
           {contracts.length} contract(s) · {all.length} function(s) ·{" "}
           <b className={risky.length ? "text-red-300" : "text-emerald-300"}>{risky.length} risky</b>
@@ -88,17 +88,17 @@ export function ContractMap({ contracts }: { contracts: MapContract[] }) {
           <Tag kind="eth" /> <Tag kind="ext" /> <Tag kind="dc" />
         </span>
         <label className="ml-auto flex cursor-pointer items-center gap-1.5">
-          <input type="checkbox" checked={onlyRisky} onChange={(e) => setOnlyRisky(e.target.checked)} className="accent-amber-400" />
+          <input type="checkbox" checked={onlyRisky} onChange={(e) => setOnlyRisky(e.target.checked)} className="accent-lavender-400" />
           Only risky
         </label>
       </div>
 
-      <div ref={box} className="relative grid gap-x-16 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div ref={box} className="relative grid gap-y-6 pr-14">
         {shown.map((c) => (
-          <div key={`${c.file}:${c.name}`} className="relative z-10 h-fit rounded-xl border border-zinc-800 bg-zinc-900/80">
-            <div className="border-b border-zinc-800 px-3 py-2">
-              <div className="font-medium text-zinc-100">{c.name}</div>
-              <div className="font-mono text-[11px] text-zinc-500">
+          <div key={`${c.file}:${c.name}`} className="glass relative z-10 h-fit rounded-2xl">
+            <div className="border-b border-mocha-800 px-3 py-2">
+              <div className="font-medium text-mocha-100">{c.name}</div>
+              <div className="font-mono text-[11px] text-mocha-500">
                 {c.kind} · {c.file}
               </div>
             </div>
@@ -130,7 +130,7 @@ export function ContractMap({ contracts }: { contracts: MapContract[] }) {
                 d={e.d}
                 fill="none"
                 markerEnd="url(#arrow)"
-                className={active ? "text-amber-300" : "text-zinc-600"}
+                className={active ? "text-lavender-300" : "text-mocha-600"}
                 stroke="currentColor"
                 strokeWidth={active ? 1.75 : 1}
                 opacity={hover && !active ? 0.15 : 0.9}
@@ -141,24 +141,24 @@ export function ContractMap({ contracts }: { contracts: MapContract[] }) {
       </div>
 
       {risky.length > 0 && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+        <div className="rounded-2xl border border-red-400/30 bg-red-500/[0.06] p-5">
           <h3 className="mb-2 text-xs font-medium uppercase tracking-widest text-red-300">Risky functions</h3>
           <ul className="space-y-1 text-sm">
             {risky.map((f) => (
               <li key={f.id}>
                 <button
                   onClick={() => view({ path: f.file, line: f.start, end: f.end, title: `${f.contract}.${f.name}()` })}
-                  className="font-mono text-amber-200 hover:underline"
+                  className="font-mono text-lavender-200 hover:underline"
                 >
                   {f.contract}.{f.name}()
                 </button>
-                <span className="text-zinc-400"> · {f.riskReasons.join(" · ")}</span>
+                <span className="text-mocha-400"> · {f.riskReasons.join(" · ")}</span>
               </li>
             ))}
           </ul>
         </div>
       )}
-      <p className="text-xs text-zinc-600">
+      <p className="text-xs text-mocha-600">
         Built by parsing the source, so it works even when the project doesn&apos;t compile. Arrows are internal calls. Click a function to open it.
       </p>
     </div>
@@ -187,12 +187,12 @@ function FnRow({
         onMouseLeave={() => onHover(null)}
         title={f.risky ? `Risky: ${f.riskReasons.join("; ")}` : `${tip}${f.guard ? ` (${f.guard})` : ""}`}
         className={`flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-left text-xs transition ${
-          f.risky ? "bg-red-500/10 ring-1 ring-red-500/50" : "hover:bg-zinc-800"
-        } ${dim ? "opacity-40" : ""} ${f.callableBy === "internal" ? "text-zinc-400" : "text-zinc-100"}`}
+          f.risky ? "bg-red-500/10 ring-1 ring-red-500/50" : "hover:bg-mocha-800"
+        } ${dim ? "opacity-40" : ""} ${f.callableBy === "internal" ? "text-mocha-400" : "text-mocha-100"}`}
       >
         <span className="truncate font-mono">
           {f.name}
-          <span className="text-zinc-500">()</span>
+          <span className="text-mocha-500">()</span>
         </span>
         {f.findings.length > 0 && <span className="text-[10px] text-red-300">●{f.findings.length}</span>}
         <span className="ml-auto flex shrink-0 gap-1">

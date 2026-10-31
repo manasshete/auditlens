@@ -48,7 +48,7 @@ export function badgeSvg(grade: Grade, score: number): string {
 <title>${label}: ${value}</title>
 <linearGradient id="s" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>
 <clipPath id="r"><rect width="${w}" height="20" rx="3" fill="#fff"/></clipPath>
-<g clip-path="url(#r)"><rect width="${lw}" height="20" fill="#27272a"/><rect x="${lw}" width="${vw}" height="20" fill="${GRADE_COLOR[grade]}"/><rect width="${w}" height="20" fill="url(#s)"/></g>
+<g clip-path="url(#r)"><rect width="${lw}" height="20" fill="#3a2d26"/><rect x="${lw}" width="${vw}" height="20" fill="${GRADE_COLOR[grade]}"/><rect width="${w}" height="20" fill="url(#s)"/></g>
 <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11">
 <text x="${lw / 2}" y="14">${label}</text><text x="${lw + vw / 2}" y="14">${value}</text></g>
 </svg>`;

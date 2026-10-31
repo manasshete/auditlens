@@ -6,6 +6,10 @@ An AI-assisted smart contract auditor for Solidity (and Soroban). It runs a stat
 
 > Automated first-pass review. Not a substitute for a professional audit.
 
+## Demo
+
+[▶ Watch the demo video](docs/AuditLens_Film.mp4) (MP4, 6 MB)
+
 ---
 
 ## Quick start (local)

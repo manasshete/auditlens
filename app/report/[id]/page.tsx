@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ComparisonBanner } from "@/components/ComparisonBanner";
 import { ReportClient } from "@/components/ReportClient";
+import { ReportHeader } from "@/components/ReportHeader";
 import { RiskGrade } from "@/components/RiskGrade";
 import { SummaryBar } from "@/components/SummaryBar";
 import { compareReports } from "@/lib/compare";
@@ -28,64 +28,34 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
     report.chain,
   );
 
-  return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-300">
-            ← New audit
-          </Link>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-50">{report.project_name}</h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            {report.files_analyzed} file(s) · {report.chain} · {report.analyzer} · model: {report.model} ·{" "}
-            {(report.duration_ms / 1000).toFixed(1)}s · {new Date(report.created_at).toLocaleString()}
-          </p>
-          {report.origin && <p className="mt-1 font-mono text-xs text-zinc-500">{report.origin}</p>}
-          {report.local_llm && (
-            <p className="mt-2 inline-block rounded bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-300 ring-1 ring-emerald-500/30">
-              Local mode · code never left this machine
+  const aside = (
+    <>
+      <RiskGrade risk={riskScore(report.summary)} reportId={report.report_id} />
+      <SummaryBar report={report} />
+      {(report.warnings.length > 0 || report.focus) && (
+        <section className="glass space-y-2 rounded-3xl p-5 text-sm">
+          <h2 className="text-xs uppercase tracking-widest text-mocha-500">Notes</h2>
+          {report.focus && (
+            <p className="rounded-xl border border-sky-400/30 bg-sky-400/5 p-3 text-sky-100">
+              Diff mode: only {report.focus.length} changed function(s) were audited ({report.focus.map((f) => f.name).join(", ")}).
             </p>
           )}
-        </div>
-        <div className="flex gap-2">
-          <Link
-            href={`/history?project=${encodeURIComponent(report.project_name)}`}
-            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-200 hover:border-amber-400/60"
-          >
-            History
-          </Link>
-          <a
-            href={`/api/report/${report.report_id}?format=md`}
-            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-200 hover:border-amber-400/60"
-          >
-            Export Markdown
-          </a>
-        </div>
-      </div>
-
-      <div className="rounded-lg border border-amber-400/30 bg-amber-400/5 px-4 py-2 text-sm text-amber-200">
-        Automated first-pass review. Not a substitute for a professional audit.
-      </div>
-
-      {report.comparison && <ComparisonBanner c={report.comparison} />}
-
-      <RiskGrade risk={riskScore(report.summary)} reportId={report.report_id} />
-
-      {report.focus && (
-        <div className="rounded-lg border border-sky-500/30 bg-sky-500/5 px-4 py-2 text-sm text-sky-200">
-          Diff mode: only {report.focus.length} changed function(s) were audited ({report.focus.map((f) => f.name).join(", ")}).
-        </div>
-      )}
-
-      {report.warnings.length > 0 && (
-        <ul className="space-y-1 rounded-lg border border-zinc-800 px-4 py-3 text-sm text-zinc-400">
           {report.warnings.map((w) => (
-            <li key={w}>⚠ {w}</li>
+            <p key={w} className="flex gap-2 rounded-xl border border-amber-400/25 bg-amber-400/5 p-3 leading-relaxed text-amber-100/90">
+              <span aria-hidden>⚠</span>
+              <span>{w}</span>
+            </p>
           ))}
-        </ul>
+        </section>
       )}
+      <p className="px-2 text-xs leading-relaxed text-mocha-500">Automated first-pass review. Not a substitute for a professional audit.</p>
+    </>
+  );
 
-      <SummaryBar report={report} />
+  return (
+    <div className="space-y-6">
+      <ReportHeader report={report} />
+      {report.comparison && <ComparisonBanner c={report.comparison} />}
 
       <ReportClient
         reportId={report.report_id}
@@ -95,22 +65,23 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
         map={map}
         hasSources={sources.length > 0}
         hasLlm={llmConfig() !== null}
-      />
-
-      {report.dropped_findings.length > 0 && (
-        <details className="rounded-xl border border-zinc-800 p-4 text-sm">
-          <summary className="cursor-pointer text-zinc-300">
-            {report.dropped_findings.length} AI claim(s) removed because they could not be verified
-          </summary>
-          <ul className="mt-3 space-y-1 text-zinc-500">
-            {report.dropped_findings.map((d, i) => (
-              <li key={i}>
-                <span className="text-zinc-300">{d.title}</span>: {d.reason}
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
+        aside={aside}
+      >
+        {report.dropped_findings.length > 0 && (
+          <details className="glass rounded-2xl p-4 text-sm">
+            <summary className="cursor-pointer text-mocha-200">
+              {report.dropped_findings.length} AI claim(s) removed because they could not be verified
+            </summary>
+            <ul className="mt-3 space-y-1 text-mocha-400">
+              {report.dropped_findings.map((d, i) => (
+                <li key={i}>
+                  <span className="text-mocha-200">{d.title}</span>: {d.reason}
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+      </ReportClient>
     </div>
   );
 }

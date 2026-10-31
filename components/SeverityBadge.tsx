@@ -5,7 +5,7 @@ export const SEVERITY_STYLE: Record<Severity, string> = {
   high: "bg-orange-500/15 text-orange-300 ring-orange-500/40",
   medium: "bg-amber-400/15 text-amber-200 ring-amber-400/40",
   low: "bg-sky-500/15 text-sky-300 ring-sky-500/40",
-  info: "bg-zinc-500/15 text-zinc-300 ring-zinc-500/40",
+  info: "bg-mocha-500/15 text-mocha-300 ring-mocha-500/40",
   optimization: "bg-emerald-500/15 text-emerald-300 ring-emerald-500/40",
 };
 

@@ -21,7 +21,7 @@ const day = (iso: string) => iso.slice(0, 10);
 export function TrendChart({ points }: { points: TrendPoint[] }) {
   const [hover, setHover] = useState<number | null>(null);
   const data = [...points].sort((a, b) => a.date.localeCompare(b.date));
-  if (data.length < 2) return <p className="text-sm text-zinc-500">Run at least two audits of this project to see a trend.</p>;
+  if (data.length < 2) return <p className="text-sm text-mocha-500">Run at least two audits of this project to see a trend.</p>;
 
   const x = (i: number) => PAD.l + (i * (W - PAD.l - PAD.r)) / (data.length - 1);
   const y = (s: number) => PAD.t + ((100 - s) * (H - PAD.t - PAD.b)) / 100;
@@ -33,17 +33,17 @@ export function TrendChart({ points }: { points: TrendPoint[] }) {
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Risk score over time">
         {[0, 50, 100].map((g) => (
           <g key={g}>
-            <line x1={PAD.l} x2={W - PAD.r} y1={y(g)} y2={y(g)} stroke="#27272a" strokeWidth={1} />
-            <text x={PAD.l - 6} y={y(g) + 3} textAnchor="end" fontSize={10} fill="#71717a">
+            <line x1={PAD.l} x2={W - PAD.r} y1={y(g)} y2={y(g)} stroke="#3a2d26" strokeWidth={1} />
+            <text x={PAD.l - 6} y={y(g) + 3} textAnchor="end" fontSize={10} fill="#8a7e75">
               {g}
             </text>
           </g>
         ))}
-        {h && <line x1={x(hover!)} x2={x(hover!)} y1={PAD.t} y2={H - PAD.b} stroke="#52525b" strokeDasharray="3 3" />}
-        <path d={line} fill="none" stroke="#fbbf24" strokeWidth={2} strokeLinejoin="round" />
+        {h && <line x1={x(hover!)} x2={x(hover!)} y1={PAD.t} y2={H - PAD.b} stroke="#6a5a50" strokeDasharray="3 3" />}
+        <path d={line} fill="none" stroke="#c4b5ec" strokeWidth={2} strokeLinejoin="round" />
         {data.map((p, i) => (
           <g key={p.id}>
-            <circle cx={x(i)} cy={y(p.score)} r={4.5} fill="#fbbf24" stroke="#09090b" strokeWidth={2} />
+            <circle cx={x(i)} cy={y(p.score)} r={4.5} fill="#c4b5ec" stroke="#1b1411" strokeWidth={2} />
             {/* Hit target wider than the mark. */}
             <rect
               x={x(i) - (W - PAD.l - PAD.r) / (data.length - 1) / 2}
@@ -56,29 +56,29 @@ export function TrendChart({ points }: { points: TrendPoint[] }) {
             />
           </g>
         ))}
-        <text x={PAD.l} y={H - 6} fontSize={10} fill="#71717a">
+        <text x={PAD.l} y={H - 6} fontSize={10} fill="#8a7e75">
           {day(data[0].date)}
         </text>
-        <text x={W - PAD.r} y={H - 6} fontSize={10} fill="#71717a" textAnchor="end">
+        <text x={W - PAD.r} y={H - 6} fontSize={10} fill="#8a7e75" textAnchor="end">
           {day(data[data.length - 1].date)}
         </text>
       </svg>
       {h && (
         <div
-          className="pointer-events-none absolute -translate-x-1/2 rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200 shadow"
+          className="pointer-events-none absolute -translate-x-1/2 rounded-md border border-mocha-700 bg-mocha-900 px-2 py-1 text-xs text-mocha-200 shadow"
           style={{ left: `${(x(hover!) / W) * 100}%`, top: 0 }}
         >
           <div className="font-medium">
             Grade {h.grade} · {h.score}/100
           </div>
-          <div className="text-zinc-400">
+          <div className="text-mocha-400">
             {h.findings} finding(s) · {new Date(h.date).toLocaleString()}
           </div>
         </div>
       )}
-      <p className="mt-1 text-xs text-zinc-600">
+      <p className="mt-1 text-xs text-mocha-600">
         Risk score (higher is safer). Latest:{" "}
-        <Link href={`/report/${data[data.length - 1].id}`} className="text-zinc-400 hover:text-zinc-200">
+        <Link href={`/report/${data[data.length - 1].id}`} className="text-mocha-400 hover:text-mocha-200">
           grade {data[data.length - 1].grade}
         </Link>
       </p>
